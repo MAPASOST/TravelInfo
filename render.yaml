@@ -1,0 +1,12 @@
+build:
+  - cd backend && npm install
+
+services:
+  - type: web
+    name: flight-tracker-api
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
