@@ -7,41 +7,34 @@ python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Python is not installed!
     echo.
-    echo Please install Python from: https://www.python.org/downloads/
-    echo Make sure to check "Add Python to PATH" during installation.
+    echo Please run INSTALL.bat first!
     echo.
     pause
     exit /b 1
 )
 
-echo Python found!
-echo.
-
-REM Try to run the app
-echo Checking required libraries...
+REM Check if libraries are installed
 python -c "import pandas, matplotlib, openpyxl" >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
-    echo Installing required libraries...
-    echo This only needs to happen once.
+    echo ERROR: Required libraries not installed!
     echo.
-    pip install -r requirements.txt
-    if %errorlevel% neq 0 (
-        echo.
-        echo ERROR: Failed to install libraries.
-        echo.
-        pause
-        exit /b 1
-    )
+    echo Please run INSTALL.bat first!
+    echo.
+    pause
+    exit /b 1
 )
 
+REM Run the app
 echo.
-echo Starting Budget Visualization...
+echo Opening Budget Visualization App...
 echo.
 python BudgetVisualization.py
 
 if %errorlevel% neq 0 (
     echo.
     echo The app closed with an error.
+    echo Check that your Excel files are formatted correctly.
+    echo.
     pause
 )

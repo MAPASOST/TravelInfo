@@ -2,22 +2,31 @@
 BUDGET VISUALIZATION - PYTHON APP
 ====================================
 
-SUPER SIMPLE - Just 2 Steps:
+SUPER SIMPLE - Just 3 Steps:
 -----------------------------
 
 STEP 1: Install Python (if you don't have it)
    - Go to: https://www.python.org/downloads/
-   - Download and install
-   - ⚠️ IMPORTANT: Check the box "Add Python to PATH"
+   - Click the big yellow "Download Python" button
+   - Run the installer
+   - ⚠️ CRITICAL: Check the box "Add Python to PATH"
+     (It's at the BOTTOM of the first installer screen)
+   - Click "Install Now"
+   - Wait for it to finish
 
-STEP 2: Double-click "run.bat"
-   - The first time, it will install some libraries (automatic)
-   - After that, the app opens instantly!
+STEP 2: Run INSTALL.bat (one-time setup)
+   - Double-click "INSTALL.bat"
+   - It will install 3 libraries (takes 1-2 minutes)
+   - Wait for "SUCCESS! Installation complete!"
+
+STEP 3: Run the app
+   - Double-click "run.bat"
+   - The app window opens!
 
 
 THAT'S IT!
 ----------
-The app will open in a window on your desktop.
+After the first-time setup, just double-click "run.bat" to open the app.
 
 
 HOW TO USE THE APP:
