@@ -32,16 +32,13 @@
       "repo": "budget-app"
     },
     "win": {
-      "target": ["nsis"],
-      "icon": "assets/icon.ico"
+      "target": ["nsis"]
     },
     "mac": {
-      "target": ["dmg"],
-      "icon": "assets/icon.icns"
+      "target": ["dmg"]
     },
     "linux": {
-      "target": ["AppImage"],
-      "icon": "assets/icon.png"
+      "target": ["AppImage"]
     }
   },
   "keywords": [
@@ -66,8 +63,6 @@
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
-    "electron-icon-maker": "^0.0.5",
-    "sharp": "^0.33.1",
     "vite": "^5.0.8",
     "wait-on": "^7.2.0"
   }

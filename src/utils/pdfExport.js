@@ -54,7 +54,11 @@ export const exportToPDF = async (budgetData, plData, fileName = 'budget-report.
       ? ((totals.variance / totals.budget) * 100).toFixed(1)
       : 0;
 
-    pdf.setTextColor(totals.variance > 0 ? 229, 62, 62 : 56, 161, 105);
+    if (totals.variance > 0) {
+      pdf.setTextColor(229, 62, 62);
+    } else {
+      pdf.setTextColor(56, 161, 105);
+    }
     pdf.text(`Variance: ${formatCurrency(totals.variance)} (${variancePercent}%)`, margin, yPosition);
     yPosition += 10;
 
@@ -119,7 +123,11 @@ export const exportToPDF = async (budgetData, plData, fileName = 'budget-report.
       xPosition += colWidths[2];
 
       // Variance
-      pdf.setTextColor(row.variance > 0 ? 229, 62, 62 : 56, 161, 105);
+      if (row.variance > 0) {
+        pdf.setTextColor(229, 62, 62);
+      } else {
+        pdf.setTextColor(56, 161, 105);
+      }
       pdf.text(formatCurrency(row.variance), xPosition, yPosition);
       xPosition += colWidths[3];
 
