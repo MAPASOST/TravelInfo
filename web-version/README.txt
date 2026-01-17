@@ -3,11 +3,17 @@ BUDGET VISUALIZATION WEB APP
 
 HOW TO USE:
 -----------
-1. Double-click "index.html" to open in your browser
-2. Click "Upload Budget File" and select your budget Excel file
-3. Click "Upload P&L File" and select your P&L Excel file
-4. View all the charts and analysis!
-5. Click "Export PDF Report" to save a PDF
+1. Double-click "BudgetApp.html" to open in your browser
+2. Click the first box to upload your budget Excel file
+3. Click the second box to upload your P&L Excel file
+4. Click "Generate Analysis" button
+5. View all the charts and tables!
+
+IMPORTANT:
+----------
+- Use BudgetApp.html (not index.html)
+- You need internet connection the FIRST time you open it
+- After that, it remembers everything and works offline
 
 EXCEL FILE FORMAT:
 ------------------
