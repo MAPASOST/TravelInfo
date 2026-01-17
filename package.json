@@ -1,0 +1,68 @@
+{
+  "name": "budget-visualization-app",
+  "version": "1.0.0",
+  "description": "Desktop app for budget and P&L visualization",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:react\" \"wait-on http://localhost:3000 && npm run start:electron\"",
+    "start:react": "vite",
+    "start:electron": "electron .",
+    "build": "vite build",
+    "build:electron": "npm run build && electron-builder",
+    "package": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.budgetapp.visualization",
+    "productName": "Budget Visualization",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "your-username",
+      "repo": "budget-app"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png"
+    }
+  },
+  "keywords": [
+    "budget",
+    "visualization",
+    "charts",
+    "electron"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.3",
+    "xlsx": "^0.18.5",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "vite": "^5.0.8",
+    "wait-on": "^7.2.0"
+  }
+}
