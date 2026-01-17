@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Visualization</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.10.3/dist/Recharts.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upload-button {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+            min-width: 250px;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-button.loaded {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .export-section {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .export-button {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(17, 153, 142, 0.3);
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-container h2 {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        .variance-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .variance-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .variance-table th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .variance-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .variance-table tbody tr:hover {
+            background-color: #f7fafc;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .welcome-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 1200px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState, useEffect } = React;
+        const { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } = Recharts;
+
+        // Excel parser
+        function parseExcelData(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                        if (!jsonData || jsonData.length < 2) {
+                            throw new Error('Excel file must contain headers and data');
+                        }
+
+                        const headers = jsonData[0];
+                        const rows = jsonData.slice(1);
+                        const categories = [];
+                        const timeline = [];
+                        const periodColumns = headers.slice(1);
+
+                        rows.forEach(row => {
+                            if (!row[0]) return;
+                            const category = { name: String(row[0]).trim(), values: [], total: 0 };
+                            periodColumns.forEach((period, idx) => {
+                                const value = parseFloat(row[idx + 1]) || 0;
+                                category.values.push({ period, amount: value });
+                                category.total += value;
+                            });
+                            categories.push(category);
+                        });
+
+                        periodColumns.forEach((period, idx) => {
+                            const total = categories.reduce((sum, cat) => sum + (parseFloat(cat.values[idx]?.amount) || 0), 0);
+                            timeline.push({ period, total });
+                        });
+
+                        resolve({
+                            categories,
+                            timeline,
+                            periods: periodColumns,
+                            grandTotal: categories.reduce((sum, cat) => sum + cat.total, 0)
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function mergeDataForComparison(budgetData, plData) {
+            const comparison = [];
+            budgetData.categories.forEach(budgetCat => {
+                const plCat = plData.categories.find(p => p.name === budgetCat.name);
+                const actualTotal = plCat ? plCat.total : 0;
+                const variance = actualTotal - budgetCat.total;
+                const variancePercent = budgetCat.total !== 0 ? ((variance / budgetCat.total) * 100).toFixed(1) : 0;
+                comparison.push({
+                    category: budgetCat.name,
+                    budget: budgetCat.total,
+                    actual: actualTotal,
+                    variance,
+                    variancePercent: parseFloat(variancePercent)
+                });
+            });
+            return comparison;
+        }
+
+        function mergeTimelineData(budgetData, plData) {
+            return budgetData.timeline.map((budgetPeriod, index) => ({
+                period: budgetPeriod.period,
+                budget: budgetPeriod.total,
+                actual: plData.timeline[index]?.total || 0
+            }));
+        }
+
+        const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#38f9d7', '#fa709a', '#fee140'];
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function App() {
+            const [budgetData, setBudgetData] = useState(null);
+            const [plData, setPlData] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+
+            const handleBudgetUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                setLoading(true);
+                setError(null);
+                try {
+                    const data = await parseExcelData(file);
+                    setBudgetData(data);
+                } catch (err) {
+                    setError('Error parsing budget file: ' + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handlePLUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                setLoading(true);
+                setError(null);
+                try {
+                    const data = await parseExcelData(file);
+                    setPlData(data);
+                } catch (err) {
+                    setError('Error parsing P&L file: ' + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const exportToPDF = () => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+
+                pdf.setFontSize(20);
+                pdf.text('Budget Analysis Report', 20, 20);
+                pdf.setFontSize(12);
+                pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+
+                const comparison = mergeDataForComparison(budgetData, plData);
+                let y = 50;
+
+                pdf.setFontSize(10);
+                comparison.forEach((row, i) => {
+                    if (y > 270) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    pdf.text(`${row.category}: Budget ${formatCurrency(row.budget)}, Actual ${formatCurrency(row.actual)}`, 20, y);
+                    y += 10;
+                });
+
+                pdf.save('budget-report.pdf');
+            };
+
+            const hasData = budgetData && plData;
+
+            return React.createElement('div', null,
+                React.createElement('div', { className: 'app-header' },
+                    React.createElement('h1', null, 'Budget & P&L Visualization'),
+                    React.createElement('p', { className: 'subtitle' }, 'Upload your Excel files to generate analysis')
+                ),
+
+                React.createElement('div', { className: 'upload-section' },
+                    React.createElement('label', null,
+                        React.createElement('input', {
+                            type: 'file',
+                            accept: '.xlsx,.xls',
+                            onChange: handleBudgetUpload
+                        }),
+                        React.createElement('button', {
+                            className: `upload-button ${budgetData ? 'loaded' : ''}`,
+                            onClick: (e) => e.currentTarget.previousSibling.click()
+                        }, budgetData ? '✓ Budget File Loaded' : '📁 Upload Budget File')
+                    ),
+                    React.createElement('label', null,
+                        React.createElement('input', {
+                            type: 'file',
+                            accept: '.xlsx,.xls',
+                            onChange: handlePLUpload
+                        }),
+                        React.createElement('button', {
+                            className: `upload-button ${plData ? 'loaded' : ''}`,
+                            onClick: (e) => e.currentTarget.previousSibling.click()
+                        }, plData ? '✓ P&L File Loaded' : '📁 Upload P&L File')
+                    )
+                ),
+
+                error && React.createElement('div', { className: 'error-message' }, error),
+
+                hasData && React.createElement('div', { className: 'export-section' },
+                    React.createElement('button', {
+                        className: 'export-button',
+                        onClick: exportToPDF
+                    }, '📄 Export PDF Report')
+                ),
+
+                hasData && React.createElement('div', { className: 'chart-grid' },
+                    React.createElement('div', { className: 'chart-container' },
+                        React.createElement('h2', null, 'Budget vs Actual'),
+                        React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
+                            React.createElement(BarChart, { data: mergeDataForComparison(budgetData, plData) },
+                                React.createElement(CartesianGrid, { strokeDasharray: '3 3' }),
+                                React.createElement(XAxis, { dataKey: 'category', angle: -45, textAnchor: 'end', height: 100 }),
+                                React.createElement(YAxis, { tickFormatter: formatCurrency }),
+                                React.createElement(Tooltip, { formatter: formatCurrency }),
+                                React.createElement(Legend),
+                                React.createElement(Bar, { dataKey: 'budget', fill: '#667eea', name: 'Budget' }),
+                                React.createElement(Bar, { dataKey: 'actual', fill: '#38ef7d', name: 'Actual' })
+                            )
+                        )
+                    ),
+                    React.createElement('div', { className: 'chart-container' },
+                        React.createElement('h2', null, 'Trend Over Time'),
+                        React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
+                            React.createElement(LineChart, { data: mergeTimelineData(budgetData, plData) },
+                                React.createElement(CartesianGrid, { strokeDasharray: '3 3' }),
+                                React.createElement(XAxis, { dataKey: 'period' }),
+                                React.createElement(YAxis, { tickFormatter: formatCurrency }),
+                                React.createElement(Tooltip, { formatter: formatCurrency }),
+                                React.createElement(Legend),
+                                React.createElement(Line, { type: 'monotone', dataKey: 'budget', stroke: '#667eea', strokeWidth: 3, name: 'Budget' }),
+                                React.createElement(Line, { type: 'monotone', dataKey: 'actual', stroke: '#38ef7d', strokeWidth: 3, name: 'Actual' })
+                            )
+                        )
+                    ),
+                    React.createElement('div', { className: 'chart-container' },
+                        React.createElement('h2', null, 'Variance Analysis'),
+                        React.createElement('table', { className: 'variance-table' },
+                            React.createElement('thead', null,
+                                React.createElement('tr', null,
+                                    React.createElement('th', null, 'Category'),
+                                    React.createElement('th', null, 'Budget'),
+                                    React.createElement('th', null, 'Actual'),
+                                    React.createElement('th', null, 'Variance'),
+                                    React.createElement('th', null, 'Variance %')
+                                )
+                            ),
+                            React.createElement('tbody', null,
+                                mergeDataForComparison(budgetData, plData).map((row, i) =>
+                                    React.createElement('tr', { key: i },
+                                        React.createElement('td', null, row.category),
+                                        React.createElement('td', null, formatCurrency(row.budget)),
+                                        React.createElement('td', null, formatCurrency(row.actual)),
+                                        React.createElement('td', { style: { color: row.variance > 0 ? '#e53e3e' : '#38a169' } },
+                                            formatCurrency(row.variance)
+                                        ),
+                                        React.createElement('td', { style: { color: row.variance > 0 ? '#e53e3e' : '#38a169' } },
+                                            `${row.variancePercent > 0 ? '+' : ''}${row.variancePercent}%`
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                !hasData && !loading && React.createElement('div', { className: 'welcome-message' },
+                    React.createElement('div', { className: 'welcome-icon' }, '📊'),
+                    React.createElement('h2', null, 'Welcome to Budget Visualization'),
+                    React.createElement('p', null, 'Upload your budget and P&L Excel files to get started.')
+                )
+            );
+        }
+
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>
