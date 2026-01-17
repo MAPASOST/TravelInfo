@@ -6,7 +6,17 @@ import CategoryPieChart from './components/CategoryPieChart';
 import VarianceTable from './components/VarianceTable';
 import FileUpload from './components/FileUpload';
 import UpdateNotification from './components/UpdateNotification';
+import RecentFiles from './components/RecentFiles';
+import ExportButtons from './components/ExportButtons';
 import { parseExcelData } from './utils/excelParser';
+import {
+  getRecentBudgetFiles,
+  getRecentPLFiles,
+  addRecentBudgetFile,
+  addRecentPLFile,
+  clearRecentFiles,
+  saveLastSession
+} from './utils/localStorage';
 
 function App() {
   const [budgetData, setBudgetData] = useState(null);
@@ -15,6 +25,10 @@ function App() {
   const [error, setError] = useState(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateDownloaded, setUpdateDownloaded] = useState(false);
+  const [recentBudgetFiles, setRecentBudgetFiles] = useState([]);
+  const [recentPLFiles, setRecentPLFiles] = useState([]);
+  const [budgetFileName, setBudgetFileName] = useState('');
+  const [plFileName, setPlFileName] = useState('');
 
   useEffect(() => {
     // Listen for update events if running in Electron
@@ -22,14 +36,25 @@ function App() {
       window.electronAPI.onUpdateAvailable(() => setUpdateAvailable(true));
       window.electronAPI.onUpdateDownloaded(() => setUpdateDownloaded(true));
     }
+
+    // Load recent files
+    setRecentBudgetFiles(getRecentBudgetFiles());
+    setRecentPLFiles(getRecentPLFiles());
   }, []);
 
-  const handleBudgetUpload = async (file) => {
+  const handleBudgetUpload = async (file, filePath = null) => {
     setLoading(true);
     setError(null);
     try {
       const data = await parseExcelData(file);
       setBudgetData(data);
+      setBudgetFileName(file.name || 'budget.xlsx');
+
+      // Add to recent files if we have a path
+      if (filePath) {
+        const updated = addRecentBudgetFile(filePath, file.name);
+        setRecentBudgetFiles(updated);
+      }
     } catch (err) {
       setError('Error parsing budget file: ' + err.message);
     } finally {
@@ -37,18 +62,43 @@ function App() {
     }
   };
 
-  const handlePLUpload = async (file) => {
+  const handlePLUpload = async (file, filePath = null) => {
     setLoading(true);
     setError(null);
     try {
       const data = await parseExcelData(file);
       setPlData(data);
+      setPlFileName(file.name || 'pl.xlsx');
+
+      // Add to recent files if we have a path
+      if (filePath) {
+        const updated = addRecentPLFile(filePath, file.name);
+        setRecentPLFiles(updated);
+      }
     } catch (err) {
       setError('Error parsing P&L file: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleClearRecentFiles = () => {
+    if (confirm('Clear all recent files?')) {
+      clearRecentFiles();
+      setRecentBudgetFiles([]);
+      setRecentPLFiles([]);
+    }
+  };
+
+  // Save session when both files are loaded
+  useEffect(() => {
+    if (budgetData && plData) {
+      saveLastSession(
+        { name: budgetFileName, data: budgetData },
+        { name: plFileName, data: plData }
+      );
+    }
+  }, [budgetData, plData, budgetFileName, plFileName]);
 
   const hasData = budgetData && plData;
 
@@ -85,6 +135,30 @@ function App() {
         />
       </div>
 
+      {!hasData && !loading && recentBudgetFiles.length > 0 && (
+        <RecentFiles
+          recentFiles={recentBudgetFiles}
+          onSelect={(file) => {
+            // In a real scenario, we'd load the file from path
+            console.log('Selected recent budget file:', file);
+          }}
+          onClear={handleClearRecentFiles}
+          type="Budget"
+        />
+      )}
+
+      {!hasData && !loading && recentPLFiles.length > 0 && (
+        <RecentFiles
+          recentFiles={recentPLFiles}
+          onSelect={(file) => {
+            // In a real scenario, we'd load the file from path
+            console.log('Selected recent P&L file:', file);
+          }}
+          onClear={handleClearRecentFiles}
+          type="P&L"
+        />
+      )}
+
       {error && (
         <div className="error-message">
           {error}
@@ -93,6 +167,7 @@ function App() {
 
       {hasData && (
         <div className="dashboard">
+          <ExportButtons budgetData={budgetData} plData={plData} />
           <div className="chart-grid">
             <div className="chart-container large">
               <h2>Budget vs Actual Comparison</h2>

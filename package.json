@@ -10,7 +10,9 @@
     "build": "vite build",
     "build:electron": "npm run build && electron-builder",
     "package": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "make-icons": "node scripts/make-icons.js"
   },
   "build": {
     "appId": "com.budgetapp.visualization",
@@ -55,13 +57,17 @@
     "react-dom": "^18.2.0",
     "recharts": "^2.10.3",
     "xlsx": "^0.18.5",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
+    "electron-icon-maker": "^0.0.5",
+    "sharp": "^0.33.1",
     "vite": "^5.0.8",
     "wait-on": "^7.2.0"
   }

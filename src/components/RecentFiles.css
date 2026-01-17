@@ -1,0 +1,111 @@
+.recent-files {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.recent-files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.recent-files-header h3 {
+  font-size: 1rem;
+  color: #2d3748;
+  margin: 0;
+  font-weight: 600;
+}
+
+.clear-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-button:hover {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+.recent-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f7fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.recent-file-item:hover {
+  background-color: #edf2f7;
+  border-color: #cbd5e0;
+  transform: translateX(4px);
+}
+
+.file-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  color: #2d3748;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-timestamp {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .recent-files {
+    padding: 12px;
+  }
+
+  .recent-files-header h3 {
+    font-size: 0.9rem;
+  }
+
+  .file-name {
+    font-size: 0.85rem;
+  }
+
+  .file-timestamp {
+    font-size: 0.7rem;
+  }
+}

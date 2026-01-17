@@ -1,0 +1,49 @@
+.export-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(17, 153, 142, 0.3);
+}
+
+.export-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(17, 153, 142, 0.4);
+}
+
+.export-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.export-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .export-buttons {
+    justify-content: center;
+  }
+
+  .export-button {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+}

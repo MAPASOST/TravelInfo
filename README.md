@@ -12,11 +12,23 @@ A powerful desktop application for visualizing organizational budgets and profit
 - 📈 **Trend Analysis**: Line charts showing spending patterns over time
 - 🥧 **Category Breakdown**: Pie charts visualizing budget allocation and actual spending by category
 - 📋 **Variance Analysis**: Detailed tables showing differences between budget and actual with percentages
+- 📄 **PDF Export**: Export detailed reports and charts as PDF documents
+- 💾 **Recent Files**: Quick access to recently opened budget and P&L files
 - 🔄 **Auto-Updates**: Built-in automatic update system for seamless version updates
 - 💼 **Professional UI**: Clean, modern interface with smooth animations
 - 📁 **Excel Import**: Direct import from .xlsx and .xls files
+- 💿 **Local Data Storage**: Automatically saves preferences and recent files locally
 
-## Installation
+## Quick Start for End Users
+
+**Download and Install:**
+1. Download the installer for your platform (Windows .exe, macOS .dmg, or Linux .AppImage)
+2. Run the installer
+3. Launch the app from your applications menu
+
+See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions and troubleshooting.
+
+## Installation for Developers
 
 ### Prerequisites
 
@@ -109,6 +121,14 @@ Sample Excel templates are available in the `samples` folder:
    - **Red values**: Over budget (unfavorable)
    - **Variance %**: Percentage difference from budget
    - **Status badges**: Quick visual indicators
+
+6. **Export Reports**: Click "Export Report" or "Export Charts" to save as PDF
+   - **Export Report**: Creates a detailed PDF with variance analysis table
+   - **Export Charts**: Captures all charts and visualizations as images in PDF
+
+7. **Recent Files**: Previously opened files appear in the recent files list for quick access
+   - Click on any recent file to reload it (feature coming soon)
+   - Clear recent files history using the × button
 
 ## Auto-Update System
 
