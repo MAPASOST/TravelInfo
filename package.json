@@ -16,29 +16,23 @@
   },
   "build": {
     "appId": "com.budgetapp.visualization",
-    "productName": "Budget Visualization",
+    "productName": "BudgetVisualization",
     "files": [
       "dist/**/*",
       "electron/**/*",
       "package.json"
     ],
     "directories": {
-      "buildResources": "assets",
       "output": "release"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "your-username",
-      "repo": "budget-app"
-    },
     "win": {
-      "target": ["nsis"]
+      "target": ["portable"]
     },
     "mac": {
-      "target": ["dmg"]
+      "target": ["dir"]
     },
     "linux": {
-      "target": ["AppImage"]
+      "target": ["dir"]
     }
   },
   "keywords": [
@@ -54,7 +48,6 @@
     "react-dom": "^18.2.0",
     "recharts": "^2.10.3",
     "xlsx": "^0.18.5",
-    "electron-updater": "^6.1.7",
     "jspdf": "^2.5.1",
     "html2canvas": "^1.4.1"
   },

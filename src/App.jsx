@@ -5,7 +5,6 @@ import TrendChart from './components/TrendChart';
 import CategoryPieChart from './components/CategoryPieChart';
 import VarianceTable from './components/VarianceTable';
 import FileUpload from './components/FileUpload';
-import UpdateNotification from './components/UpdateNotification';
 import RecentFiles from './components/RecentFiles';
 import ExportButtons from './components/ExportButtons';
 import { parseExcelData } from './utils/excelParser';
@@ -23,20 +22,12 @@ function App() {
   const [plData, setPlData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [updateDownloaded, setUpdateDownloaded] = useState(false);
   const [recentBudgetFiles, setRecentBudgetFiles] = useState([]);
   const [recentPLFiles, setRecentPLFiles] = useState([]);
   const [budgetFileName, setBudgetFileName] = useState('');
   const [plFileName, setPlFileName] = useState('');
 
   useEffect(() => {
-    // Listen for update events if running in Electron
-    if (window.electronAPI) {
-      window.electronAPI.onUpdateAvailable(() => setUpdateAvailable(true));
-      window.electronAPI.onUpdateDownloaded(() => setUpdateDownloaded(true));
-    }
-
     // Load recent files
     setRecentBudgetFiles(getRecentBudgetFiles());
     setRecentPLFiles(getRecentPLFiles());
@@ -108,17 +99,6 @@ function App() {
         <h1>Budget & P&L Visualization Dashboard</h1>
         <p className="subtitle">Upload your budget and profit & loss statements to generate comprehensive analysis</p>
       </header>
-
-      {updateAvailable && !updateDownloaded && (
-        <UpdateNotification message="A new update is being downloaded..." />
-      )}
-      {updateDownloaded && (
-        <UpdateNotification
-          message="Update downloaded! Click to restart and install."
-          action={() => window.electronAPI.restartApp()}
-          actionLabel="Restart Now"
-        />
-      )}
 
       <div className="upload-section">
         <FileUpload

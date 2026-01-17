@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
@@ -35,11 +34,6 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
-  // Check for updates
-  if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
-  }
 }
 
 app.whenReady().then(() => {
@@ -80,17 +74,4 @@ ipcMain.handle('select-file', async () => {
     name: path.basename(filePath),
     data: Array.from(fileBuffer)
   };
-});
-
-// Auto-updater events
-autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('update-available');
-});
-
-autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update-downloaded');
-});
-
-ipcMain.on('restart-app', () => {
-  autoUpdater.quitAndInstall();
 });
