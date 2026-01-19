@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✈️ Flight Price Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .destination-card {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .route {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+        }
+
+        .price {
+            color: #667eea;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .prediction {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .price-list {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .price-item {
+            padding: 0.5rem;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .chart {
+            margin-top: 1rem;
+            height: 200px;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>✈️ Flight Price Tracker</h1>
+            <p>Track flight prices and get AI predictions - Works completely offline!</p>
+        </header>
+
+        <div id="successMessage" class="success hidden"></div>
+
+        <div class="card">
+            <h2>Add New Destination</h2>
+            <form id="destinationForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="origin">Origin Airport</label>
+                        <input type="text" id="origin" placeholder="JFK" maxlength="3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination Airport</label>
+                        <input type="text" id="destination" placeholder="LAX" maxlength="3" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Add Destination</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Your Tracked Destinations</h2>
+            <div id="destinationsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage using localStorage
+        class FlightTracker {
+            constructor() {
+                this.destinations = this.loadData('destinations') || [];
+                this.prices = this.loadData('prices') || [];
+                this.alerts = this.loadData('alerts') || [];
+            }
+
+            loadData(key) {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            }
+
+            saveData(key, data) {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+
+            addDestination(origin, destination) {
+                const id = Date.now();
+                const dest = {
+                    id,
+                    origin: origin.toUpperCase(),
+                    destination: destination.toUpperCase(),
+                    createdAt: new Date().toISOString()
+                };
+                this.destinations.push(dest);
+                this.saveData('destinations', this.destinations);
+                return dest;
+            }
+
+            addPrice(destinationId, price, date, airline = '') {
+                const priceEntry = {
+                    id: Date.now(),
+                    destinationId,
+                    price: parseFloat(price),
+                    date,
+                    airline,
+                    createdAt: new Date().toISOString()
+                };
+                this.prices.push(priceEntry);
+                this.saveData('prices', this.prices);
+                this.checkAlerts(destinationId, price);
+                return priceEntry;
+            }
+
+            getPrices(destinationId) {
+                return this.prices
+                    .filter(p => p.destinationId === destinationId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+
+            deleteDestination(id) {
+                this.destinations = this.destinations.filter(d => d.id !== id);
+                this.prices = this.prices.filter(p => p.destinationId !== id);
+                this.alerts = this.alerts.filter(a => a.destinationId !== id);
+                this.saveData('destinations', this.destinations);
+                this.saveData('prices', this.prices);
+                this.saveData('alerts', this.alerts);
+            }
+
+            addAlert(destinationId, targetPrice) {
+                const alert = {
+                    id: Date.now(),
+                    destinationId,
+                    targetPrice: parseFloat(targetPrice),
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                };
+                this.alerts.push(alert);
+                this.saveData('alerts', this.alerts);
+                return alert;
+            }
+
+            getAlerts(destinationId) {
+                return this.alerts.filter(a => a.destinationId === destinationId);
+            }
+
+            checkAlerts(destinationId, currentPrice) {
+                const alerts = this.getAlerts(destinationId).filter(a => a.isActive);
+                const triggered = alerts.filter(a => currentPrice <= a.targetPrice);
+                if (triggered.length > 0) {
+                    const dest = this.destinations.find(d => d.id === destinationId);
+                    alert(`🎉 Price Alert! ${dest.origin} → ${dest.destination} is now $${currentPrice}, below your target of $${triggered[0].targetPrice}!`);
+                }
+            }
+
+            // Linear Regression for Price Prediction
+            predictPrice(destinationId) {
+                const prices = this.getPrices(destinationId);
+                if (prices.length < 3) {
+                    return null;
+                }
+
+                // Convert dates to numeric values (days from first price)
+                const firstDate = new Date(prices[prices.length - 1].date).getTime();
+                const dataPoints = prices.map(p => {
+                    const daysDiff = (new Date(p.date).getTime() - firstDate) / (1000 * 60 * 60 * 24);
+                    return { x: daysDiff, y: p.price };
+                }).reverse();
+
+                // Calculate linear regression
+                const n = dataPoints.length;
+                let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+
+                dataPoints.forEach(point => {
+                    sumX += point.x;
+                    sumY += point.y;
+                    sumXY += point.x * point.y;
+                    sumXX += point.x * point.x;
+                });
+
+                const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+
+                // Predict 30 days in the future
+                const today = new Date().getTime();
+                const futureDays = (today - firstDate) / (1000 * 60 * 60 * 24) + 30;
+                let predictedPrice = slope * futureDays + intercept;
+
+                // Calculate confidence (based on data points and variance)
+                const avgPrice = sumY / n;
+                const variance = dataPoints.reduce((sum, p) => sum + Math.pow(p.y - avgPrice, 2), 0) / n;
+                const coefficientOfVariation = Math.sqrt(variance) / avgPrice;
+                let confidence = Math.min(95, 40 + n * 5 - coefficientOfVariation * 100);
+                confidence = Math.max(30, Math.round(confidence));
+
+                // Ensure reasonable prediction
+                if (predictedPrice < 0) predictedPrice = avgPrice * 0.8;
+                if (predictedPrice > avgPrice * 2) predictedPrice = avgPrice * 1.2;
+
+                return {
+                    price: Math.round(predictedPrice * 100) / 100,
+                    confidence,
+                    trend: slope > 0 ? 'increasing' : slope < 0 ? 'decreasing' : 'stable'
+                };
+            }
+        }
+
+        // Initialize app
+        const tracker = new FlightTracker();
+
+        // Render destinations
+        function renderDestinations() {
+            const container = document.getElementById('destinationsList');
+
+            if (tracker.destinations.length === 0) {
+                container.innerHTML = '<div class="empty-state">No destinations tracked yet. Add your first destination above!</div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="grid">' + tracker.destinations.map(dest => {
+                const prices = tracker.getPrices(dest.id);
+                const latestPrice = prices[0];
+                const prediction = tracker.predictPrice(dest.id);
+                const alerts = tracker.getAlerts(dest.id).filter(a => a.isActive);
+
+                return `
+                    <div class="destination-card">
+                        <div class="route">${dest.origin} → ${dest.destination}</div>
+
+                        ${latestPrice ? `
+                            <div class="price">$${latestPrice.price.toFixed(2)}</div>
+                            <div class="stats">
+                                <span>📅 ${new Date(latestPrice.date).toLocaleDateString()}</span>
+                                ${latestPrice.airline ? `<span>✈️ ${latestPrice.airline}</span>` : ''}
+                            </div>
+                        ` : '<div style="color: #666;">No prices recorded yet</div>'}
+
+                        ${prediction ? `
+                            <div class="prediction">
+                                🤖 Predicted: $${prediction.price.toFixed(2)} (${prediction.confidence}% confidence)<br>
+                                📈 Trend: ${prediction.trend}
+                            </div>
+                        ` : ''}
+
+                        ${alerts.length > 0 ? `
+                            <div class="alert-badge">🔔 Alert set: $${alerts[0].targetPrice.toFixed(2)}</div>
+                        ` : ''}
+
+                        <div class="button-group">
+                            <button class="btn btn-small" onclick="showAddPrice(${dest.id})">Add Price</button>
+                            <button class="btn btn-small" onclick="showDetails(${dest.id})">Details</button>
+                            <button class="btn btn-small" onclick="setAlert(${dest.id})">Set Alert</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteDestination(${dest.id})">Delete</button>
+                        </div>
+
+                        <div id="details-${dest.id}" class="hidden">
+                            <div class="price-list">
+                                ${prices.slice(0, 10).map(p => `
+                                    <div class="price-item">
+                                        <span>$${p.price.toFixed(2)} ${p.airline ? `- ${p.airline}` : ''}</span>
+                                        <span>${new Date(p.date).toLocaleDateString()}</span>
+                                    </div>
+                                `).join('') || '<p>No price history</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        // Event handlers
+        document.getElementById('destinationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const origin = document.getElementById('origin').value;
+            const destination = document.getElementById('destination').value;
+
+            tracker.addDestination(origin, destination);
+            showSuccess('Destination added successfully!');
+            e.target.reset();
+            renderDestinations();
+        });
+
+        function showAddPrice(destId) {
+            const price = prompt('Enter price:');
+            if (!price) return;
+
+            const date = prompt('Enter flight date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+            if (!date) return;
+
+            const airline = prompt('Enter airline (optional):') || '';
+
+            tracker.addPrice(destId, price, date, airline);
+            showSuccess('Price added successfully!');
+            renderDestinations();
+        }
+
+        function showDetails(destId) {
+            const details = document.getElementById(`details-${destId}`);
+            details.classList.toggle('hidden');
+        }
+
+        function setAlert(destId) {
+            const targetPrice = prompt('Enter target price for alerts:');
+            if (!targetPrice) return;
+
+            tracker.addAlert(destId, targetPrice);
+            showSuccess('Alert created! You\'ll be notified when prices drop below $' + targetPrice);
+            renderDestinations();
+        }
+
+        function deleteDestination(destId) {
+            if (!confirm('Delete this destination and all its data?')) return;
+            tracker.deleteDestination(destId);
+            showSuccess('Destination deleted');
+            renderDestinations();
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
+        // Initial render
+        renderDestinations();
+    </script>
+</body>
+</html>
